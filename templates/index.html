@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titan Article Writer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #1e293b;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        header p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .panel h2 {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 12px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #0f172a;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #0f172a;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .output-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .article-content {
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .article-content h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            color: #0f172a;
+        }
+        
+        .article-content h2 {
+            font-size: 20px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            color: #1e293b;
+        }
+        
+        .article-content p {
+            margin-bottom: 16px;
+        }
+        
+        .article-content ul, .article-content ol {
+            margin-left: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .article-content li {
+            margin-bottom: 8px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #0f172a;
+            padding: 40px 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f1f5f9;
+            border-top: 4px solid #0f172a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .copy-button {
+            width: auto;
+            padding: 8px 16px;
+            background: #e2e8f0;
+            color: #0f172a;
+            margin-top: 0;
+            margin-left: auto;
+            display: block;
+            font-size: 14px;
+        }
+        
+        .copy-button:hover {
+            background: #cbd5e1;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Titan Article Writer</h1>
+            <p>Write authoritative articles in your voice, powered by Claude</p>
+        </header>
+        
+        <div class="workspace">
+            <div class="panel">
+                <h2>Your Brief</h2>
+                
+                <form id="briefForm">
+                    <div class="form-group">
+                        <label for="brief">Article Brief *</label>
+                        <textarea id="brief" name="brief" placeholder="What do you want to write about? Describe the topic, use case, or problem you're solving..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="angle">Article Angle (Optional)</label>
+                        <select id="angle" name="angle">
+                            <option value="">-- Choose an angle or leave blank --</option>
+                            <option value="Usage-Based vs Seat-Based Pricing">Usage-Based vs Seat-Based Pricing</option>
+                            <option value="Drag-and-Drop vs Code">Drag-and-Drop vs Code</option>
+                            <option value="All-in-One vs Point Solutions">All-in-One vs Point Solutions</option>
+                            <option value="Salesforce-Native vs Middleware">Salesforce-Native vs Middleware</option>
+                            <option value="Time to Deploy">Time to Deploy</option>
+                            <option value="Security, Compliance, and Audit-Readiness">Security, Compliance, and Audit-Readiness</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="audience">Target Audience (Optional)</label>
+                        <select id="audience" name="audience">
+                            <option value="">-- Choose an audience or leave blank --</option>
+                            <option value="RevOps / Sales leadership">RevOps / Sales leadership</option>
+                            <option value="Salesforce admins">Salesforce admins</option>
+                            <option value="IT managers / budget holders">IT managers / budget holders</option>
+                            <option value="Sales ops / enablement">Sales ops / enablement</option>
+                            <option value="Architects">Architects</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" id="generateBtn">Generate Article</button>
+                </form>
+            </div>
+            
+            <div class="panel" id="outputPanel" style="display: none;">
+                <h2>Generated Article</h2>
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Writing your article...</p>
+                </div>
+                <div id="articleOutput" class="hidden">
+                    <button class="copy-button" onclick="copyArticle()">Copy Article</button>
+                    <div id="articleContent" class="article-content" style="margin-top: 16px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorContainer"></div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('briefForm');
+        const outputPanel = document.getElementById('outputPanel');
+        const loading = document.getElementById('loading');
+        const articleOutput = document.getElementById('articleOutput');
+        const articleContent = document.getElementById('articleContent');
+        const errorContainer = document.getElementById('errorContainer');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const brief = document.getElementById('brief').value;
+            const angle = document.getElementById('angle').value;
+            const audience = document.getElementById('audience').value;
+            
+            if (!brief.trim()) {
+                showError('Please provide a brief');
+                return;
+            }
+            
+            outputPanel.style.display = 'block';
+            loading.style.display = 'block';
+            articleOutput.classList.add('hidden');
+            errorContainer.innerHTML = '';
+            
+            try {
+                const response = await fetch('/generate-article', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        brief,
+                        angle,
+                        audience
+                    })
+                });
+                
+                const data = await response.json();
+                loading.style.display = 'none';
+                
+                if (response.ok) {
+                    articleContent.textContent = data.article;
+                    articleOutput.classList.remove('hidden');
+                    outputPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    showError(data.error || 'Failed to generate article');
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                showError(`Error: ${error.message}`);
+            }
+        });
+        
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            errorContainer.innerHTML = '';
+            errorContainer.appendChild(errorDiv);
+        }
+        
+        function copyArticle() {
+            const text = articleContent.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Article copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+    </script>
+</body>
+</html>
