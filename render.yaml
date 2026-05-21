@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: titan-article-writer
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn article_app:app
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        scope: run
+        sync: false
